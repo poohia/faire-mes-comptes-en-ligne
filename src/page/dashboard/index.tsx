@@ -3,9 +3,10 @@ import { useFirebase } from "../../context/firebase.context";
 import { Redirect } from "react-router-dom";
 import { Container, Grid, Button } from "semantic-ui-react";
 import { Statement } from "../../model/statement.model";
-import { NewUserComponent } from "./component";
+import { NewUserComponent } from "./components";
 import { arrayEquals } from "../../App";
-import { ModalCreateStatement } from "./component/modalcreatestatement.component";
+import { ModalCreateStatement } from "./components/modalcreatestatement.component";
+import { StatementList } from "./components/statementlist.component";
 
 const Dashboard = () => {
   const [statements, setStatements] = useState<Statement[] | null>(null);
@@ -39,6 +40,11 @@ const Dashboard = () => {
           <Button secondary onClick={() => setOpenModal(true)}>
             Faire mon relever de compte du moi
           </Button>
+        </Grid.Column>
+      </Grid.Row>
+      <Grid.Row>
+        <Grid.Column>
+          <StatementList statements={statements} />
         </Grid.Column>
       </Grid.Row>
       <ModalCreateStatement open={openModal} setOpen={setOpenModal} />

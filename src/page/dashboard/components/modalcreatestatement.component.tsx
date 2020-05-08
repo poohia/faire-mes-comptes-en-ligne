@@ -37,7 +37,7 @@ export const ModalCreateStatement = ({
   };
 
   return (
-    <Modal open={open}>
+    <Modal open={open} closeOnEscape={true} closeOnDimmerClick={true}>
       <Modal.Header>Nouveau relevé de compte</Modal.Header>
       <Modal.Content image>
         <Image

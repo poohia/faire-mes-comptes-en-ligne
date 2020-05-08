@@ -25,6 +25,7 @@ export type FirebaseContextProps = {
   signOut: () => void;
   listenStatement: () => Observable<any | null>;
   createStatement: (statement: Statement) => Promise<Statement>;
+  deleteStatement: (id: string) => Promise<any>;
 };
 
 export function createCtx<ContextType>() {
@@ -135,6 +136,13 @@ export const FirebaseProvider = ({
     });
   };
 
+  const deleteStatement = (id: string): Promise<any> => {
+    const table = FirebaseApp.database.ref(
+      `${FirebaseApp.user?.uid}/statements/${id}`
+    );
+    return table.remove();
+  };
+
   useEffect(() => {
     console.log("enter use effect firebaseContext");
     initCurrentUser();
@@ -151,6 +159,7 @@ export const FirebaseProvider = ({
         user: FirebaseApp.user,
         listenStatement,
         createStatement,
+        deleteStatement,
       }}
     >
       {children}
