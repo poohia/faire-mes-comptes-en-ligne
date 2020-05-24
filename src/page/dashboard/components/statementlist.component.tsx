@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { Table, Button, Icon, Popup } from "semantic-ui-react";
-
 import moment from "moment";
+
 import { Statement } from "../../../model/statement.model";
 import { useHistory } from "react-router";
 import { useFirebase } from "../../../context/firebase.context";
@@ -30,7 +30,7 @@ export const StatementList = ({ statements }: { statements: Statement[] }) => {
                 <Button
                   icon
                   title="Ouvrir"
-                  secondary
+                  color="blue"
                   onClick={() => push(`dashboard/statement/${statement.id}`)}
                 >
                   <Icon name="external" />

@@ -3,14 +3,10 @@ import { useFirebase } from "./context/firebase.context";
 import { FButton } from "./styled/button.styled";
 import { Redirect } from "react-router-dom";
 
-export const arrayEquals = (arr1: any[], arr2: any[]): boolean => {
-  return JSON.stringify(arr1) === JSON.stringify(arr2);
-};
-
 const App = () => {
-  const { authenticated, connectWithGoogle, user } = useFirebase();
-  console.log(user);
+  const { authenticated, loadingUser, connectWithGoogle } = useFirebase();
 
+  if (loadingUser) return <div>Loading ....</div>;
   if (authenticated) return <Redirect to="/dashboard" />;
   return (
     <div className="App">

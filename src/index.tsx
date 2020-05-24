@@ -8,10 +8,12 @@ import "./index.css";
 import App from "./App";
 import * as serviceWorker from "./serviceWorker";
 import FirebaseProvider from "./context/firebase.context";
-import Dashboard from "./page/dashboard";
+import DashboardPage from "./page/dashboard";
+import StatementPage from "./page/statement";
 import { TemplateConnected } from "./component";
 
 import "moment/locale/fr";
+import StatisticsPage from "./page/statistics";
 moment.locale("fr");
 
 ReactDOM.render(
@@ -24,7 +26,17 @@ ReactDOM.render(
           </Route>
           <Route path="/dashboard" exact>
             <TemplateConnected>
-              <Dashboard />
+              <DashboardPage />
+            </TemplateConnected>
+          </Route>
+          <Route path="/dashboard/statement/:id" exact>
+            <TemplateConnected>
+              <StatementPage />
+            </TemplateConnected>
+          </Route>
+          <Route path="/statistics" exact>
+            <TemplateConnected>
+              <StatisticsPage />
             </TemplateConnected>
           </Route>
         </Switch>

@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { Header, Button, Modal, Image, Form } from "semantic-ui-react";
+import { useHistory } from "react-router";
+
 import moment from "moment";
 import { Statement } from "../../../model/statement.model";
 import { useFirebase } from "../../../context/firebase.context";
@@ -11,9 +13,10 @@ export const ModalCreateStatement = ({
   open: boolean;
   setOpen: (open: boolean) => void;
 }) => {
-  let now = moment();
+  const now = moment();
 
-  const { createStatement } = useFirebase();
+  const { createStatement, statementOfMonthCreated } = useFirebase();
+  const { push } = useHistory();
 
   const [value, setValue] = useState<string>(
     `Mon relevé de compte du moi de ${now
@@ -23,21 +26,26 @@ export const ModalCreateStatement = ({
 
   const [loading, setLoading] = useState(false);
 
-  useEffect(() => {}, [loading]);
-
+  useEffect(() => {}, [loading, statementOfMonthCreated]);
   const preapreCreateStatement = () => {
     setLoading(true);
     const createDate = now.toDate().toString();
     const statement: Statement = {
-      id: moment(createDate).format("DDMMYYYY"),
+      id: moment(createDate).format("MMYYYY"),
       label: value,
       createDate,
     };
-    createStatement(statement).then((val) => console.log(val));
+    createStatement(statement).then((val) =>
+      push(`dashboard/statement/${statement.id}`)
+    );
   };
-
   return (
-    <Modal open={open} closeOnEscape={true} closeOnDimmerClick={true}>
+    <Modal
+      open={open}
+      closeOnEscape={true}
+      closeOnDimmerClick={true}
+      onClose={() => setOpen(false)}
+    >
       <Modal.Header>Nouveau relevé de compte</Modal.Header>
       <Modal.Content image>
         <Image
@@ -77,7 +85,7 @@ export const ModalCreateStatement = ({
           icon="angle right"
           labelPosition="right"
           content="Créer"
-          disabled={value === ""}
+          disabled={value === "" || statementOfMonthCreated === true}
           loading={loading}
           onClick={preapreCreateStatement}
         />

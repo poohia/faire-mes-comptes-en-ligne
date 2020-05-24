@@ -2,8 +2,10 @@ import React, { useState, useEffect } from "react";
 import firebase from "firebase";
 import app from "firebase/app";
 import { Observable } from "rxjs";
+import moment from "moment";
+
 import { User } from "../model/user.model";
-import { Statement } from "../model/statement.model";
+import { Statement, Payment } from "../model/statement.model";
 
 const firebaseConfig = {
   apiKey: "AIzaSyCiiVoKLuwQ4HE0nEPEoH-o56EnvqQAjik",
@@ -18,14 +20,23 @@ const firebaseConfig = {
 export type FirebaseContextProps = {
   app?: firebase.app.App | null;
   authenticated: boolean;
+  statementOfMonthCreated: boolean;
   user: User | null;
+  loadingUser: boolean;
   setAuthenticated: (authenticated: boolean) => void;
   initCurrentUser: () => void;
   connectWithGoogle: () => void;
   signOut: () => void;
-  listenStatement: () => Observable<any | null>;
+  listenStatements: () => Observable<any | null>;
+  listenStatement: (id: string) => Observable<Statement>;
   createStatement: (statement: Statement) => Promise<Statement>;
   deleteStatement: (id: string) => Promise<any>;
+  appendPayment: (statement: Statement, payment: Payment) => Promise<Payment>;
+  setPaymentActive: (
+    statement: Statement,
+    payment: Payment,
+    active: boolean
+  ) => Promise<Payment>;
 };
 
 export function createCtx<ContextType>() {
@@ -87,6 +98,10 @@ export const FirebaseProvider = ({
   children: React.ReactNode;
 }) => {
   const [authenticated, setAuthenticated] = useState<boolean>(false);
+  const [statementOfMonthCreated, setStatementOfMonthCreated] = useState<
+    boolean
+  >(false);
+  const [loadingUser, setLoadingUser] = useState<boolean>(true);
 
   const initCurrentUser = () => {
     firebase.auth().onAuthStateChanged((user) => {
@@ -98,7 +113,10 @@ export const FirebaseProvider = ({
           emailVerified: user.emailVerified,
         };
         setAuthenticated(true);
+        setLoadingUser(false);
+        checkStatementOfMonth();
       } else {
+        setLoadingUser(false);
         setAuthenticated(false);
       }
     });
@@ -113,13 +131,40 @@ export const FirebaseProvider = ({
     firebase.auth().signOut();
   };
 
-  const listenStatement = (): Observable<any | null> => {
+  const checkStatementOfMonth = () => {
+    const now = moment();
+    const table = FirebaseApp.database.ref(
+      `${FirebaseApp.user?.uid}/statements/${now.format("MMYYYY")}`
+    );
+    table.once("value", (snapshot) => {
+      const value = snapshot.val();
+      if (value !== null) {
+        setStatementOfMonthCreated(true);
+      } else {
+        setStatementOfMonthCreated(false);
+      }
+    });
+  };
+
+  const listenStatements = (): Observable<any | null> => {
     const table = FirebaseApp.database.ref(
       `${FirebaseApp.user?.uid}/statements`
     );
     return Observable.create((observer: any) => {
       table.on("value", (snapshot) => {
         observer.next(snapshot.val());
+      });
+    });
+  };
+
+  const listenStatement = (id: string): Observable<Statement> => {
+    const table = FirebaseApp.database.ref(
+      `${FirebaseApp.user?.uid}/statements/${id}`
+    );
+    return Observable.create((observer: any) => {
+      table.on("value", (snapshot) => {
+        const val = snapshot.val();
+        observer.next(val);
       });
     });
   };
@@ -131,7 +176,10 @@ export const FirebaseProvider = ({
       );
       table
         .set(statement)
-        .then((val) => resolve(val))
+        .then((val) => {
+          resolve(val);
+          setStatementOfMonthCreated(true);
+        })
         .catch(() => reject());
     });
   };
@@ -140,11 +188,36 @@ export const FirebaseProvider = ({
     const table = FirebaseApp.database.ref(
       `${FirebaseApp.user?.uid}/statements/${id}`
     );
-    return table.remove();
+    return table.remove().then(() => checkStatementOfMonth());
+  };
+
+  const appendPayment = (
+    statement: Statement,
+    payment: Payment
+  ): Promise<any> => {
+    let table = FirebaseApp.database.ref(
+      `${FirebaseApp.user?.uid}/statements/${statement.id}/payments/`
+    );
+    const newPostKey = table.push().key;
+    payment.id = newPostKey ?? "ERROR";
+    table = FirebaseApp.database.ref(
+      `${FirebaseApp.user?.uid}/statements/${statement.id}/payments/${newPostKey}`
+    );
+    return table.set(payment);
+  };
+
+  const setPaymentActive = (
+    statement: Statement,
+    payment: Payment,
+    active: boolean
+  ): Promise<any> => {
+    let table = FirebaseApp.database.ref(
+      `${FirebaseApp.user?.uid}/statements/${statement.id}/payments/${payment.id}/active`
+    );
+    return table.set(active);
   };
 
   useEffect(() => {
-    console.log("enter use effect firebaseContext");
     initCurrentUser();
   }, []);
 
@@ -152,14 +225,19 @@ export const FirebaseProvider = ({
     <CtxProvider
       value={{
         authenticated,
+        loadingUser,
+        statementOfMonthCreated,
+        user: FirebaseApp.user,
         setAuthenticated,
         initCurrentUser,
         connectWithGoogle,
         signOut,
-        user: FirebaseApp.user,
+        listenStatements,
         listenStatement,
         createStatement,
         deleteStatement,
+        appendPayment,
+        setPaymentActive,
       }}
     >
       {children}

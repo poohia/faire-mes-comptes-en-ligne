@@ -1,55 +1,82 @@
 import React, { useState, useEffect } from "react";
-import { useFirebase } from "../../context/firebase.context";
-import { Redirect } from "react-router-dom";
+import moment from "moment";
 import { Container, Grid, Button } from "semantic-ui-react";
-import { Statement } from "../../model/statement.model";
-import { NewUserComponent } from "./components";
-import { arrayEquals } from "../../App";
-import { ModalCreateStatement } from "./components/modalcreatestatement.component";
-import { StatementList } from "./components/statementlist.component";
+import { Redirect, Link } from "react-router-dom";
+import { Subscription } from "rxjs";
 
-const Dashboard = () => {
+import { useFirebase } from "../../context/firebase.context";
+import { Statement } from "../../model/statement.model";
+import {
+  NewUserComponent,
+  StatementList,
+  ModalCreateStatement,
+} from "./components";
+
+const DashboardPage = () => {
   const [statements, setStatements] = useState<Statement[] | null>(null);
   const [openModal, setOpenModal] = useState(false);
-  const { authenticated, listenStatement } = useFirebase();
+  const [
+    subscriptionStatements,
+    setSubscriptionStatements,
+  ] = useState<Subscription | null>(null);
+  const [loadingStatements, setLoadingStatements] = useState<boolean>(true);
+  const {
+    authenticated,
+    loadingUser,
+    listenStatements,
+    statementOfMonthCreated,
+  } = useFirebase();
 
   useEffect(() => {
-    console.log("i'm here");
-    listenStatement().subscribe((val) => {
-      if (val !== null) {
-        const currStatements: Statement[] = [];
-        for (let key in val) {
-          currStatements.push(val[key]);
-        }
-        if (!statements || !arrayEquals(currStatements, statements))
-          setStatements(currStatements);
-      } else {
-        setStatements(val);
-      }
-    });
-  }, [openModal, statements]);
-  console.log(statements);
+    if (subscriptionStatements === null && authenticated) {
+      setSubscriptionStatements(
+        listenStatements().subscribe((val) => {
+          if (loadingStatements) setLoadingStatements(false);
+
+          if (val !== null) {
+            setStatements(Object.values(val));
+          } else {
+            setStatements(val);
+          }
+        })
+      );
+    }
+  }, [openModal, statements, statementOfMonthCreated, authenticated]);
+
+  if (loadingUser || loadingStatements) return <div>Loading ....</div>;
   if (!authenticated) return <Redirect to="/" />;
   if (statements === null) {
     return <NewUserComponent></NewUserComponent>;
   }
   return (
     <Container>
-      <Grid.Row>
-        <Grid.Column>
-          <Button secondary onClick={() => setOpenModal(true)}>
-            Faire mon relever de compte du moi
-          </Button>
-        </Grid.Column>
-      </Grid.Row>
-      <Grid.Row>
-        <Grid.Column>
-          <StatementList statements={statements} />
-        </Grid.Column>
-      </Grid.Row>
-      <ModalCreateStatement open={openModal} setOpen={setOpenModal} />
+      <Grid>
+        <Grid.Row>
+          <Grid.Column>
+            {statementOfMonthCreated === false && (
+              <Button secondary onClick={() => setOpenModal(true)}>
+                Faire mon relever de compte du moi
+              </Button>
+            )}
+            {statementOfMonthCreated === true && (
+              <Link to={`dashboard/statement/${moment().format("MMYYYY")}`}>
+                <Button secondary>Editer mon relever de compte du moi</Button>
+              </Link>
+            )}
+          </Grid.Column>
+        </Grid.Row>
+        <Grid.Row>
+          <Grid.Column>
+            <StatementList statements={statements} />
+          </Grid.Column>
+        </Grid.Row>
+      </Grid>
+
+      {openModal && (
+        <ModalCreateStatement open={openModal} setOpen={setOpenModal} />
+      )}
     </Container>
   );
 };
 
-export default Dashboard;
+export default DashboardPage;

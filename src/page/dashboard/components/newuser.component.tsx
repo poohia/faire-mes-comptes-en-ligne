@@ -18,7 +18,9 @@ export const NewUserComponent = () => {
           </Button>
         </Grid.Column>
       </Grid.Row>
-      <ModalCreateStatement open={openModal} setOpen={setOpenModal} />
+      {openModal && (
+        <ModalCreateStatement open={openModal} setOpen={setOpenModal} />
+      )}
     </React.Fragment>
   );
 };
