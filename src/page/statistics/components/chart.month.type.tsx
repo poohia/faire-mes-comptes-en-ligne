@@ -1,13 +1,5 @@
-import React, { useState, useEffect } from "react";
-import {
-  BarChart,
-  Bar,
-  XAxis,
-  YAxis,
-  CartesianGrid,
-  Tooltip,
-  Legend,
-} from "recharts";
+import React from "react";
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip } from "recharts";
 
 import { Statement, Payment } from "../../../model/statement.model";
 
@@ -52,7 +44,7 @@ export const ChartMonthType = ({
           return `${value} euros`;
         }}
       />
-      <Bar dataKey="montant" fill="#8884d8" />
+      <Bar dataKey="montant" fill="#11c1ab" />
     </BarChart>
   );
 };

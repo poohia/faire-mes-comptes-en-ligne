@@ -12,3 +12,36 @@ code {
   font-family: source-code-pro, Menlo, Monaco, Consolas, "Courier New",
     monospace;
 }
+
+.ui.primary.button,
+.ui.primary.buttons .button {
+  background-color: #11c1ab !important;
+  color: white !important;
+}
+
+.ui.blue.menu .active.item,
+.ui.menu .blue.active.item {
+  color: #11c1ab !important;
+}
+
+.ui.secondary.button,
+.ui.secondary.buttons .button {
+  background-color: #34495e !important;
+  color: white !important;
+}
+
+.ui.negative.button,
+.ui.negative.buttons .button {
+  background-color: #ff5e57 !important;
+  color: white !important;
+}
+
+input[type="text"]:focus,
+input[type="number"]:focus {
+  border-color: #11c1ab !important;
+}
+
+.ui.selection.dropdown:focus,
+.ui.selection.dropdown:focus .menu {
+  border-color: #11c1ab !important;
+}

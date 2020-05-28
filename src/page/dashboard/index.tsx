@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import moment from "moment";
-import { Container, Grid, Button } from "semantic-ui-react";
+import { Container, Grid, Button, Header, Icon } from "semantic-ui-react";
 import { Redirect, Link } from "react-router-dom";
 import { Subscription } from "rxjs";
 
@@ -10,6 +10,7 @@ import {
   NewUserComponent,
   StatementList,
   ModalCreateStatement,
+  FooterDashboard,
 } from "./components";
 
 const DashboardPage = () => {
@@ -52,18 +53,10 @@ const DashboardPage = () => {
     <Container>
       <Grid>
         <Grid.Row>
-          <Grid.Column>
-            {statementOfMonthCreated === false && (
-              <Button secondary onClick={() => setOpenModal(true)}>
-                Faire mon relever de compte du moi
-              </Button>
-            )}
-            {statementOfMonthCreated === true && (
-              <Link to={`dashboard/statement/${moment().format("MMYYYY")}`}>
-                <Button secondary>Editer mon relever de compte du moi</Button>
-              </Link>
-            )}
-          </Grid.Column>
+          <Header as="h1" style={{ paddingLeft: "10px" }}>
+            <Icon name="file alternate outline" /> Ma liste des relevés de
+            comptes
+          </Header>
         </Grid.Row>
         <Grid.Row>
           <Grid.Column>
@@ -75,6 +68,11 @@ const DashboardPage = () => {
       {openModal && (
         <ModalCreateStatement open={openModal} setOpen={setOpenModal} />
       )}
+      <FooterDashboard
+        statementOfMonthCreated={statementOfMonthCreated}
+        statements={statements}
+        openModalCreateStatment={setOpenModal}
+      />
     </Container>
   );
 };

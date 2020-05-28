@@ -46,7 +46,7 @@ export const ChartCompareMonths = ({
           return `${value} euros`;
         }}
       />
-      <Bar dataKey="total" fill="#8884d8" />
+      <Bar dataKey="total" fill="#11c1ab" />
     </BarChart>
   );
 };

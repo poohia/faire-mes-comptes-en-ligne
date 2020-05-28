@@ -1,3 +1,4 @@
 import { ModalCreatePayment } from "./modalcreatepayment";
+import { FooterStatement } from "./footerstatement.component";
 
-export { ModalCreatePayment };
+export { ModalCreatePayment, FooterStatement };

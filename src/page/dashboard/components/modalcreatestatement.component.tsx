@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Header, Button, Modal, Image, Form } from "semantic-ui-react";
+import { Header, Button, Modal, Image, Form, Icon } from "semantic-ui-react";
 import { useHistory } from "react-router";
 
 import moment from "moment";
@@ -46,18 +46,20 @@ export const ModalCreateStatement = ({
       closeOnDimmerClick={true}
       onClose={() => setOpen(false)}
     >
-      <Modal.Header>Nouveau relevé de compte</Modal.Header>
+      <Modal.Header>
+        <Icon name="file alternate outline" /> Nouveau relevé de compte
+      </Modal.Header>
       <Modal.Content image>
         <Image
           wrapped
           size="medium"
+          rounded
           src="https://firebasestorage.googleapis.com/v0/b/faire-mes-comptes-en-ligne.appspot.com/o/safe-piggy-bank-1237063-1599x1070.jpg?alt=media&token=765a92eb-fafe-4fad-82a4-e0a724a0ca56"
         />
         <Modal.Description>
-          <Header>Default Profile Image</Header>
           <p>
-            We've found the following gravatar image associated with your e-mail
-            address.
+            Afin de créer votre rélever de compte du moins, il est necessaire de
+            lui donner un intitulé puis cliquer sur "Créer"
           </p>
           <Form onSubmit={preapreCreateStatement}>
             <Form.Field>

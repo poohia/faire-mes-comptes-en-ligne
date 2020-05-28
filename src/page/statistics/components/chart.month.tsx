@@ -44,7 +44,7 @@ export const ChartMonth = ({ statement }: { statement: Statement }) => {
           return `${value} euros`;
         }}
       />
-      <Bar dataKey="montant" fill="#8884d8" />
+      <Bar dataKey="montant" fill="#11c1ab" />
     </BarChart>
   );
 };

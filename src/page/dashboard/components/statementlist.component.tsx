@@ -1,77 +1,77 @@
 import React, { useState } from "react";
-import { Table, Button, Icon, Popup } from "semantic-ui-react";
+import { Table, Button, Icon, Popup, Modal, Header } from "semantic-ui-react";
 import moment from "moment";
+import styled from "styled-components";
 
 import { Statement } from "../../../model/statement.model";
 import { useHistory } from "react-router";
 import { useFirebase } from "../../../context/firebase.context";
+import { ListContent } from "../../../component";
 
 export const StatementList = ({ statements }: { statements: Statement[] }) => {
   const { push } = useHistory();
   const { deleteStatement } = useFirebase();
-  const [openPopup, setOpenPopup] = useState<string>("");
+  const [statementDelete, setStatementDelete] = useState<Statement | null>(
+    null
+  );
 
   return (
-    <Table color="blue">
-      <Table.Header>
-        <Table.Row>
-          <Table.HeaderCell colSpan="2">Liste de vos relevé</Table.HeaderCell>
-        </Table.Row>
-      </Table.Header>
-      <Table.Body>
+    <React.Fragment>
+      <ListContent>
         {statements.map((statement) => (
-          <Table.Row>
-            <Table.Cell>
-              {statement.label} <br />
-              <i>Fait le {moment(statement.createDate).format("DD/MM/YYYY")}</i>
-            </Table.Cell>
-            <Table.Cell textAlign="right">
-              <Button.Group>
-                <Button
-                  icon
-                  title="Ouvrir"
-                  color="blue"
-                  onClick={() => push(`dashboard/statement/${statement.id}`)}
-                >
-                  <Icon name="external" />
-                </Button>
-                <Popup
-                  on="click"
-                  pinned
-                  trigger={
-                    <Button icon title="Supprimer" color="red">
-                      <Icon name="delete" />
-                    </Button>
-                  }
-                  open={openPopup === statement.id}
-                  onOpen={() => setOpenPopup(statement.id)}
-                  onClose={() => setOpenPopup("")}
-                >
-                  <Popup.Content>
-                    Êtes-vous sur de vouloir supprimer ce relevé? <br />
-                    <Button
-                      icon
-                      color="green"
-                      size="mini"
-                      onClick={() => deleteStatement(statement.id)}
-                    >
-                      <Icon name="check" />
-                    </Button>
-                    <Button
-                      icon
-                      color="red"
-                      size="mini"
-                      onClick={() => setOpenPopup("")}
-                    >
-                      <Icon name="close" />
-                    </Button>
-                  </Popup.Content>
-                </Popup>
-              </Button.Group>
-            </Table.Cell>
-          </Table.Row>
+          <div
+            className="hizmet-buton"
+            onClick={() => push(`dashboard/statement/${statement.id}`)}
+          >
+            <span className="hizmet-title">{statement.label}</span>
+            <span className="hizmet-small">
+              Fait le {moment(statement.createDate).format("DD/MM/YYYY")}
+            </span>
+            <Button
+              className="hizmet-fiyat-secondary"
+              onClick={(event) => {
+                event.stopPropagation();
+                setStatementDelete(statement);
+              }}
+            >
+              Supprimer
+            </Button>
+            <Button className="hizmet-fiyat"> Ouvrir</Button>
+          </div>
         ))}
-      </Table.Body>
-    </Table>
+      </ListContent>
+      <Modal
+        open={statementDelete !== null}
+        basic
+        size="small"
+        onClose={() => setStatementDelete(null)}
+        closeOnEscape
+        closeOnTriggerClick
+      >
+        <Header icon="archive" content="Suppression d'un relevé" />
+        <Modal.Content>
+          <p>
+            Êtes-vous sûr de vouloir supprimer votre relevé de compte{" "}
+            {statementDelete?.label}
+          </p>
+        </Modal.Content>
+        <Modal.Actions>
+          <Button primary onClick={() => setStatementDelete(null)}>
+            <Icon name="remove" /> Non
+          </Button>
+          <Button
+            negative
+            onClick={() =>
+              statementDelete &&
+              deleteStatement(statementDelete.id).then(() =>
+                setStatementDelete(null)
+              )
+            }
+          >
+            Oui &nbsp; <Icon name="checkmark" />
+          </Button>
+        </Modal.Actions>
+      </Modal>
+    </React.Fragment>
   );
 };
