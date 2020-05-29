@@ -66,7 +66,13 @@ const DashboardPage = () => {
       </Grid>
 
       {openModal && (
-        <ModalCreateStatement open={openModal} setOpen={setOpenModal} />
+        <ModalCreateStatement
+          open={openModal}
+          setOpen={setOpenModal}
+          statements={statements.filter(
+            (statement) => statement.payments !== undefined
+          )}
+        />
       )}
       <FooterDashboard
         statementOfMonthCreated={statementOfMonthCreated}

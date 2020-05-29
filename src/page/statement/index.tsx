@@ -7,6 +7,7 @@ import {
   Checkbox,
   Header,
   Icon,
+  Input,
 } from "semantic-ui-react";
 import { Subscription } from "rxjs";
 
@@ -40,6 +41,8 @@ const StatementPage = () => {
     setPaymentActive,
   } = useFirebase();
   const [openModal, setOpenModal] = useState<boolean>(false);
+  const [filterString, setFilterString] = useState<string>("");
+  const [editPayment, setEditPayment] = useState<Payment | null>(null);
   const [statement, setStatement] = useState<Statement | null>(null);
   const [total, setTotal] = useState<number>(0);
   const [
@@ -62,6 +65,20 @@ const StatementPage = () => {
   }
   if (!authenticated) return <Redirect to="/" />;
 
+  const getPayments = () => {
+    const v = statement.payments;
+    if (v === undefined) {
+      return [];
+    }
+    const payments: Payment[] = Object.values(v);
+    if (filterString !== "") {
+      return payments.filter((payment: Payment) =>
+        payment.label.includes(filterString)
+      );
+    }
+    return payments;
+  };
+
   return (
     <Container>
       <Grid>
@@ -76,14 +93,34 @@ const StatementPage = () => {
             )}
           </Header>
         </Grid.Row>
+        {statement.payments !== undefined && (
+          <Grid.Row>
+            <Grid.Column width="16">
+              <Input
+                icon="search"
+                placeholder="Rechercher par intitulé"
+                fluid
+                onChange={(_event, data) =>
+                  setFilterString(data.value as string)
+                }
+              />
+            </Grid.Column>
+          </Grid.Row>
+        )}
         <Grid.Row>
           <Grid.Column>
             <ListContent>
               {statement.payments &&
-                Object.values(statement.payments).map((v) => {
+                getPayments().map((v) => {
                   const payment: Payment = v as Payment;
                   return (
-                    <div className="hizmet-buton">
+                    <div
+                      className="hizmet-buton"
+                      onClick={() => {
+                        setEditPayment(payment);
+                        setOpenModal(true);
+                      }}
+                    >
                       <Checkbox
                         checked={payment.active}
                         onChange={(event, data) => {
@@ -124,80 +161,17 @@ const StatementPage = () => {
       />
       {openModal && (
         <ModalCreatePayment
-          open={openModal}
-          setOpen={setOpenModal}
+          open={true}
+          setOpen={() => {
+            setEditPayment(null);
+            setOpenModal(false);
+          }}
           statement={statement}
+          paymentEdit={editPayment}
         />
       )}
     </Container>
   );
-
-  // return (
-  //   <Container>
-  //     <Grid>
-  //       <Grid.Row>
-  //         <Button secondary onClick={() => setOpenModal(true)}>
-  //           Ouvrir modal
-  //         </Button>
-  //       </Grid.Row>
-  //       <Grid.Row>
-  //         <Table compact celled definition>
-  //           <Table.Header>
-  //             <Table.Row>
-  //               <Table.HeaderCell />
-  //               <Table.HeaderCell>Intitulé</Table.HeaderCell>
-  //               <Table.HeaderCell>Montant</Table.HeaderCell>
-  //             </Table.Row>
-  //           </Table.Header>
-
-  //           <Table.Body>
-  //             {statement.payments &&
-  //               Object.values(statement.payments).map((v) => {
-  //                 const payment: Payment = v as Payment;
-  //                 return (
-  //                   <Table.Row>
-  //                     <Table.Cell collapsing>
-  //                       <Checkbox
-  //                         toggle
-  //                         checked={payment.active}
-  //                         onChange={(_event, data) =>
-  //                           setPaymentActive(
-  //                             statement,
-  //                             payment,
-  //                             data.checked || false
-  //                           )
-  //                         }
-  //                       />
-  //                     </Table.Cell>
-  //                     <Table.Cell>{payment.label}</Table.Cell>
-  //                     <Table.Cell>{`${payment.debit ? "-" : "+"} ${
-  //                       payment.amount
-  //                     }`}</Table.Cell>
-  //                   </Table.Row>
-  //                 );
-  //               })}
-  //           </Table.Body>
-
-  //           <Table.Footer fullWidth>
-  //             <Table.Row>
-  //               <Table.HeaderCell />
-  //               <Table.HeaderCell colSpan="10">
-  //                 Total : {total.toFixed(2)}
-  //               </Table.HeaderCell>
-  //             </Table.Row>
-  //           </Table.Footer>
-  //         </Table>
-  //       </Grid.Row>
-  //     </Grid>
-  //     {openModal && (
-  //       <ModalCreatePayment
-  //         open={openModal}
-  //         setOpen={setOpenModal}
-  //         statement={statement}
-  //       />
-  //     )}
-  //   </Container>
-  // );
 };
 
 export default StatementPage;

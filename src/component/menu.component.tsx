@@ -8,7 +8,7 @@ export const MenuConnected = () => {
   const { pathname } = window.location;
   return (
     <Menu stackable size="massive" color="blue" style={{ borderRadius: "0px" }}>
-      <Link to="/">
+      <Link to="/dashboard">
         <Menu.Item style={{ padding: "8px" }}>
           <img src="/logotmp.png" />
         </Menu.Item>

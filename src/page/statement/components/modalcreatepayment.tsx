@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Modal, Header, Form, Button, Icon } from "semantic-ui-react";
+import { Modal, Form, Button, Icon } from "semantic-ui-react";
 import {
   PaymentOptions,
   AlgoTypePayment,
@@ -19,7 +19,7 @@ const defaultPayment: Payment = {
 type Props = {
   open: boolean;
   setOpen: (open: boolean) => void;
-  paymentEdit?: Payment;
+  paymentEdit: Payment | null;
   statement: Statement;
 };
 
@@ -32,16 +32,33 @@ export const ModalCreatePayment = ({
   const [payment, setPayment] = useState<Payment>(
     paymentEdit ? paymentEdit : defaultPayment
   );
+
   const [loading, setLoading] = useState<boolean>(false);
-  const { appendPayment } = useFirebase();
+  const { appendPayment, editPayment, deletePayment } = useFirebase();
   useEffect(() => {}, [statement, payment]);
   const submit = () => {
     setLoading(true);
-    appendPayment(statement, payment).then((val) => {
-      setOpen(false);
-      // setLoading(false);
-    });
+    if (paymentEdit !== null) {
+      editPayment(statement, payment).then(() => {
+        setOpen(false);
+      });
+    } else {
+      appendPayment(statement, payment).then(() => {
+        setOpen(false);
+      });
+    }
   };
+  const actionDeletePayment = () => {
+    setLoading(true);
+    deletePayment(statement, payment).then(() => setOpen(false));
+  };
+  const formIsValid = (): boolean => {
+    if (payment.label === "" || payment.amount <= 0 || payment.type === "") {
+      return true;
+    }
+    return false;
+  };
+
   return (
     <Modal
       open={open}
@@ -89,6 +106,7 @@ export const ModalCreatePayment = ({
                 label="Intitulé"
                 placeholder="Forfait mobile"
                 value={payment.label}
+                required
                 onChange={(_event, data) =>
                   setPayment({
                     ...payment,
@@ -101,9 +119,8 @@ export const ModalCreatePayment = ({
                 className="button icon"
                 placeholder="Selection du type de facturation"
                 options={PaymentOptions}
-                // trigger={<React.Fragment />}
+                required
                 label="Type de facture"
-                // value={AlgoTypePayment("test")}
                 value={payment.type}
                 defaultValue={payment.type}
                 onChange={(_event, data) =>
@@ -122,6 +139,9 @@ export const ModalCreatePayment = ({
                 label="Montant"
                 type="number"
                 step="0.01"
+                min="1"
+                required
+                defaultValue={payment.amount}
                 onChange={(_event, data) =>
                   setPayment({ ...payment, amount: Number(data.value) })
                 }
@@ -131,24 +151,52 @@ export const ModalCreatePayment = ({
         </Modal.Description>
       </Modal.Content>
       <Modal.Actions>
-        <Button
-          onClick={() => setOpen(false)}
-          secondary
-          labelPosition="left"
-          icon="close"
-          type="button"
-          content="Annuler"
-          loading={loading}
-        ></Button>
-        <Button
-          primary
-          type="submit"
-          labelPosition="right"
-          icon="checkmark"
-          content="Valider"
-          onClick={submit}
-          loading={loading}
-        />
+        {paymentEdit !== null && (
+          <React.Fragment>
+            <Button
+              onClick={actionDeletePayment}
+              negative
+              labelPosition="left"
+              icon="trash"
+              type="button"
+              content="Supprimer"
+              loading={loading}
+            ></Button>
+            <Button
+              primary
+              type="submit"
+              labelPosition="right"
+              icon="checkmark"
+              content="Valider"
+              onClick={submit}
+              loading={loading}
+              disabled={formIsValid()}
+            />
+          </React.Fragment>
+        )}
+        {paymentEdit === null && (
+          <React.Fragment>
+            <Button
+              onClick={() => setOpen(false)}
+              secondary
+              labelPosition="left"
+              icon="close"
+              type="button"
+              content="Annuler"
+              loading={loading}
+            ></Button>
+            <Button
+              primary
+              type="submit"
+              labelPosition="right"
+              icon="checkmark"
+              content="Valider"
+              onClick={submit}
+              loading={loading}
+              disabled={formIsValid()}
+            />
+          </React.Fragment>
+        )}
       </Modal.Actions>
     </Modal>
   );

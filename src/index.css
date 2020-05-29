@@ -30,10 +30,25 @@ code {
   color: white !important;
 }
 
-.ui.negative.button,
-.ui.negative.buttons .button {
+.ui.negative.active.button {
   background-color: #ff5e57 !important;
   color: white !important;
+}
+.ui.basic.negative.button,
+.ui.basic.negative.button:hover {
+  color: #ff5e57 !important;
+  border-color: #ff5e57 !important;
+}
+
+.ui.positive.active.button {
+  background-color: #11c1ab !important;
+  color: white !important;
+}
+
+.ui.basic.positive.button,
+.ui.basic.positive.button:hover {
+  color: #11c1ab !important;
+  border-color: #11c1ab !important;
 }
 
 input[type="text"]:focus,

@@ -1,12 +1,30 @@
 import React, { useState, useEffect } from "react";
 import moment from "moment";
-import { Container, Grid, Dropdown } from "semantic-ui-react";
+import { Container, Grid, Dropdown, Header } from "semantic-ui-react";
 import { Redirect } from "react-router-dom";
 import { Subscription } from "rxjs";
+import styled from "styled-components";
 
 import { useFirebase } from "../../context/firebase.context";
-import { Statement, PaymentOptions } from "../../model/statement.model";
+import {
+  Statement,
+  PaymentOptions,
+  getLabelOfType,
+} from "../../model/statement.model";
 import { ChartMonth, ChartMonthType, ChartCompareMonths } from "./components";
+
+const ChartContent = styled.div`
+  width: 100%;
+  overflow-y: auto;
+  background: white;
+  padding: 10px;
+  margin: 2px;
+  border-radius: 8px;
+  box-shadow: 0 0 5px 1px lightgrey;
+  .ui.dropdown.icon.button > .dropdown.icon {
+    padding: 0 !important;
+  }
+`;
 
 const StatisticsPage = () => {
   const [statements, setStatements] = useState<Statement[] | null>(null);
@@ -57,62 +75,86 @@ const StatisticsPage = () => {
   );
 
   return (
-    <Container>
+    <Container fluid>
       <Grid>
-        <Grid.Row>
-          <Dropdown
-            fluid
-            selection
-            options={statements.map((statement) => ({
-              key: statement.id,
-              text: statement.label,
-              value: statement.id,
-            }))}
-            defaultValue={statementSelected}
-            onChange={(_event, data) =>
-              setStatementSelected(data.value as string)
-            }
-          />
-        </Grid.Row>
-        <Grid.Row>
-          {statementSelectedObject && (
-            <ChartMonth statement={statementSelectedObject} />
-          )}
-        </Grid.Row>
-        <Grid.Row>
-          <Dropdown
-            className="button icon"
-            placeholder="Selection du type de facturation"
-            options={PaymentOptions}
-            label="Type de facture"
-            onChange={(_event, data) => setTypeSelected(data.value as string)}
-            defaultValue={typeSelected}
-            fluid
-            selection
-            search
-          />
-        </Grid.Row>
-        <Grid.Row>
-          {statementSelectedObject && (
-            <ChartMonthType
-              statement={statementSelectedObject}
-              type={typeSelected}
-            />
-          )}
+        <Grid.Row columns={1}>
+          <Grid.Column>
+            <ChartContent>
+              {/* <Dropdown
+                fluid
+                selection
+                options={statements.map((statement) => ({
+                  key: statement.id,
+                  text: statement.label,
+                  value: statement.id,
+                }))}
+                defaultValue={statementSelected}
+                onChange={(_event, data) =>
+                  setStatementSelected(data.value as string)
+                }
+              /> */}
+              <Header as="h1">{lastStatement?.label}</Header>
+              {statementSelectedObject && (
+                <ChartMonth statement={statementSelectedObject} />
+              )}
+            </ChartContent>
+          </Grid.Column>
         </Grid.Row>
         {currStatement && lastStatement && (
-          <React.Fragment>
-            <Grid.Row>
-              Comparaison du relevé {currStatement.label} avec le relevé{" "}
-              {lastStatement.label}
-            </Grid.Row>
-            <Grid.Row>
-              <ChartCompareMonths
-                currStatement={currStatement}
-                lastStatement={lastStatement}
-              />
-            </Grid.Row>
-          </React.Fragment>
+          <Grid.Row>
+            <Grid.Column computer={"8"} tablet={"16"}>
+              <ChartContent>
+                {/* <Dropdown
+                  className="button icon"
+                  placeholder="Selection du type de facturation"
+                  options={PaymentOptions}
+                  label="Type de facture"
+                  onChange={(_event, data) =>
+                    setTypeSelected(data.value as string)
+                  }
+                  defaultValue={typeSelected}
+                  fluid
+                  selection
+                  search
+                /> */}
+                <Header as="h1">
+                  {lastStatement?.label} par catégorie{" "}
+                  {getLabelOfType(typeSelected)}
+                </Header>
+                <Dropdown
+                  className="button icon"
+                  placeholder="Selection du type de facturation"
+                  options={PaymentOptions}
+                  label="Type de facture"
+                  onChange={(_event, data) =>
+                    setTypeSelected(data.value as string)
+                  }
+                  defaultValue={typeSelected}
+                  selection
+                />
+                <br />
+                <br />
+                {statementSelectedObject && (
+                  <ChartMonthType
+                    statement={statementSelectedObject}
+                    type={typeSelected}
+                  />
+                )}
+              </ChartContent>
+            </Grid.Column>
+            <Grid.Column computer={"8"} tablet={"16"}>
+              <ChartContent>
+                <Header as="h1">
+                  Comparaison du relevé {currStatement.label} avec le relevé{" "}
+                </Header>
+                {lastStatement.label}
+                <ChartCompareMonths
+                  currStatement={currStatement}
+                  lastStatement={lastStatement}
+                />
+              </ChartContent>
+            </Grid.Column>
+          </Grid.Row>
         )}
       </Grid>
     </Container>

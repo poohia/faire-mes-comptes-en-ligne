@@ -32,11 +32,13 @@ export type FirebaseContextProps = {
   createStatement: (statement: Statement) => Promise<Statement>;
   deleteStatement: (id: string) => Promise<any>;
   appendPayment: (statement: Statement, payment: Payment) => Promise<Payment>;
+  editPayment: (statement: Statement, payment: Payment) => Promise<Payment>;
   setPaymentActive: (
     statement: Statement,
     payment: Payment,
     active: boolean
   ) => Promise<Payment>;
+  deletePayment: (statement: Statement, payment: Payment) => Promise<Payment>;
 };
 
 export function createCtx<ContextType>() {
@@ -206,6 +208,16 @@ export const FirebaseProvider = ({
     return table.set(payment);
   };
 
+  const editPayment = (
+    statement: Statement,
+    payment: Payment
+  ): Promise<any> => {
+    const table = FirebaseApp.database.ref(
+      `${FirebaseApp.user?.uid}/statements/${statement.id}/payments/${payment.id}`
+    );
+    return table.set(payment);
+  };
+
   const setPaymentActive = (
     statement: Statement,
     payment: Payment,
@@ -215,6 +227,16 @@ export const FirebaseProvider = ({
       `${FirebaseApp.user?.uid}/statements/${statement.id}/payments/${payment.id}/active`
     );
     return table.set(active);
+  };
+
+  const deletePayment = (
+    statement: Statement,
+    payment: Payment
+  ): Promise<any> => {
+    const table = FirebaseApp.database.ref(
+      `${FirebaseApp.user?.uid}/statements/${statement.id}/payments/${payment.id}`
+    );
+    return table.remove();
   };
 
   useEffect(() => {
@@ -237,7 +259,9 @@ export const FirebaseProvider = ({
         createStatement,
         deleteStatement,
         appendPayment,
+        editPayment,
         setPaymentActive,
+        deletePayment,
       }}
     >
       {children}

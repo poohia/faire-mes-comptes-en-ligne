@@ -17,7 +17,11 @@ export const NewUserComponent = () => {
         </Grid.Column>
       </Grid.Row>
       {openModal && (
-        <ModalCreateStatement open={openModal} setOpen={setOpenModal} />
+        <ModalCreateStatement
+          open={openModal}
+          setOpen={setOpenModal}
+          statements={null}
+        />
       )}
       <FooterDashboard openModalCreateStatment={setOpenModal} />
     </Container>

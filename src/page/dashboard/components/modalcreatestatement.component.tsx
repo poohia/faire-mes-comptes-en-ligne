@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Header, Button, Modal, Image, Form, Icon } from "semantic-ui-react";
+import { Button, Modal, Image, Form, Icon } from "semantic-ui-react";
 import { useHistory } from "react-router";
 
 import moment from "moment";
@@ -9,9 +9,11 @@ import { useFirebase } from "../../../context/firebase.context";
 export const ModalCreateStatement = ({
   open,
   setOpen,
+  statements,
 }: {
   open: boolean;
   setOpen: (open: boolean) => void;
+  statements: Statement[] | null;
 }) => {
   const now = moment();
 
@@ -23,7 +25,9 @@ export const ModalCreateStatement = ({
       .format("MMM")[0]
       .toUpperCase()}${now.format("MMM").substring(1)}`
   );
-
+  const [statementDuplicatedId, setStatementDuplicatedId] = useState<
+    string | null
+  >(null);
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {}, [loading, statementOfMonthCreated]);
@@ -35,6 +39,14 @@ export const ModalCreateStatement = ({
       label: value,
       createDate,
     };
+    if (statements && statementDuplicatedId !== null) {
+      const statementFind = statements.find(
+        (statement) => statement.id === statementDuplicatedId
+      );
+      if (statementFind) {
+        statement.payments = statementFind.payments;
+      }
+    }
     createStatement(statement).then((val) =>
       push(`dashboard/statement/${statement.id}`)
     );
@@ -46,6 +58,7 @@ export const ModalCreateStatement = ({
       closeOnDimmerClick={true}
       onClose={() => setOpen(false)}
     >
+      {console.log(statements)}
       <Modal.Header>
         <Icon name="file alternate outline" /> Nouveau relevé de compte
       </Modal.Header>
@@ -68,8 +81,29 @@ export const ModalCreateStatement = ({
                 placeholder={value}
                 value={value}
                 onChange={(_event, data) => setValue(data.value)}
+                required
               />
-            </Form.Field>{" "}
+            </Form.Field>
+            {statements !== null && statements.length > 0 && (
+              <Form.Field>
+                <Form.Dropdown
+                  label="Dupliquer à partir du relevé"
+                  fluid
+                  selection
+                  clearable
+                  options={statements.map((statement) => ({
+                    key: statement.id,
+                    value: statement.id,
+                    text: statement.label,
+                  }))}
+                  onChange={(_event, data) =>
+                    setStatementDuplicatedId(
+                      data.value === "" ? null : (data.value as string)
+                    )
+                  }
+                />
+              </Form.Field>
+            )}
           </Form>
         </Modal.Description>
       </Modal.Content>
