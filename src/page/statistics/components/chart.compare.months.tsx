@@ -27,7 +27,7 @@ export const ChartCompareMonths = ({
   }
 
   return (
-    <ResponsiveContainer width="100%" height={300}>
+    <ResponsiveContainer width="100%" height={340}>
       <BarChart
         width={413}
         height={300}

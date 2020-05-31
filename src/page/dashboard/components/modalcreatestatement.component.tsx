@@ -48,7 +48,7 @@ export const ModalCreateStatement = ({
       }
     }
     createStatement(statement).then((val) =>
-      push(`dashboard/statement/${statement.id}`)
+      push(`statements/statement/${statement.id}`)
     );
   };
   return (
@@ -58,7 +58,6 @@ export const ModalCreateStatement = ({
       closeOnDimmerClick={true}
       onClose={() => setOpen(false)}
     >
-      {console.log(statements)}
       <Modal.Header>
         <Icon name="file alternate outline" /> Nouveau relevé de compte
       </Modal.Header>
@@ -67,7 +66,7 @@ export const ModalCreateStatement = ({
           wrapped
           size="medium"
           rounded
-          src="https://firebasestorage.googleapis.com/v0/b/faire-mes-comptes-en-ligne.appspot.com/o/safe-piggy-bank-1237063-1599x1070.jpg?alt=media&token=765a92eb-fafe-4fad-82a4-e0a724a0ca56"
+          src="https://firebasestorage.googleapis.com/v0/b/faire-mes-comptes-en-ligne.appspot.com/o/statement-image.jpg?alt=media&token=b833d1e6-6cc3-435f-a9a8-d7f98b1f147a"
         />
         <Modal.Description>
           <p>

@@ -18,7 +18,7 @@ import {
   Payment,
   getLabelOfType,
 } from "../../model/statement.model";
-import { ListContent } from "../../component";
+import { ListContent, LoadingComponent } from "../../component";
 
 export const getTotal = (payments: Payment[]): number => {
   let total: number = 0;
@@ -58,10 +58,10 @@ const StatementPage = () => {
       );
     if (statement && statement.payments)
       setTotal(getTotal(Object.values(statement.payments) as Payment[]));
-  }, [statement, authenticated]);
+  }, [statement, authenticated, id, subscriptionStatement, listenStatement]);
 
   if (loadingUser || statement === null) {
-    return <div>Loading...</div>;
+    return <LoadingComponent />;
   }
   if (!authenticated) return <Redirect to="/" />;
 
@@ -155,10 +155,6 @@ const StatementPage = () => {
           </Grid.Column>
         </Grid.Row>
       </Grid>
-      <FooterStatement
-        openModalAddPaiement={setOpenModal}
-        total={total.toFixed(2)}
-      />
       {openModal && (
         <ModalCreatePayment
           open={true}
@@ -170,6 +166,10 @@ const StatementPage = () => {
           paymentEdit={editPayment}
         />
       )}
+      <FooterStatement
+        openModalAddPaiement={setOpenModal}
+        total={total.toFixed(2)}
+      />
     </Container>
   );
 };

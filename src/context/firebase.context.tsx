@@ -1,11 +1,16 @@
 import React, { useState, useEffect } from "react";
-import firebase from "firebase";
+import * as firebase from "firebase/app";
+
 import app from "firebase/app";
 import { Observable } from "rxjs";
 import moment from "moment";
 
 import { User } from "../model/user.model";
 import { Statement, Payment } from "../model/statement.model";
+
+import "firebase/app";
+import "firebase/auth";
+import "firebase/database";
 
 const firebaseConfig = {
   apiKey: "AIzaSyCiiVoKLuwQ4HE0nEPEoH-o56EnvqQAjik",
@@ -26,6 +31,14 @@ export type FirebaseContextProps = {
   setAuthenticated: (authenticated: boolean) => void;
   initCurrentUser: () => void;
   connectWithGoogle: () => void;
+  connectWithEmailAndPassword: (
+    email: string,
+    password: string
+  ) => Promise<firebase.auth.UserCredential>;
+  createUserWithEmailAndPassword: (
+    email: string,
+    password: string
+  ) => Promise<firebase.auth.UserCredential>;
   signOut: () => void;
   listenStatements: () => Observable<any | null>;
   listenStatement: (id: string) => Observable<Statement>;
@@ -73,21 +86,37 @@ class Firebase {
 
   set user(user: User | null) {
     this._user = user;
-    this.checkUserIntoBdd();
   }
 
   get user(): User | null {
     return this._user;
   }
 
-  checkUserIntoBdd() {
-    if (this._user === null) return;
-    const table = this.database.ref(this._user.uid);
-    table.once("value").then((snapshot) => {
-      const val = snapshot.val();
-      if (val === null) {
-        table.set(this._user);
+  checkUserIntoBdd(): Promise<User> {
+    return new Promise((resolve, reject) => {
+      if (this._user === null) {
+        reject(new Error("unconnect"));
+        return;
       }
+      const table = this.database.ref(this._user.uid);
+      table.once("value").then((snapshot) => {
+        const val = snapshot.val();
+        if (val === null) {
+          table
+            .set(this._user)
+            .then(() => {
+              if (this._user) {
+                resolve(this._user);
+              } else {
+                reject();
+              }
+            })
+            .catch(() => reject());
+        } else {
+          this._user = val;
+          resolve(val);
+        }
+      });
     });
   }
 }
@@ -113,10 +142,17 @@ export const FirebaseProvider = ({
           displayName: user.displayName,
           email: user.email,
           emailVerified: user.emailVerified,
+          offer: "free",
         };
-        setAuthenticated(true);
-        setLoadingUser(false);
-        checkStatementOfMonth();
+        if (user.emailVerified) {
+          FirebaseApp.checkUserIntoBdd().then(() => {
+            setAuthenticated(true);
+            checkStatementOfMonth();
+            setLoadingUser(false);
+          });
+        } else {
+          signOut();
+        }
       } else {
         setLoadingUser(false);
         setAuthenticated(false);
@@ -124,8 +160,59 @@ export const FirebaseProvider = ({
     });
   };
 
+  const createUserWithEmailAndPassword = (
+    email: string,
+    password: string
+  ): Promise<firebase.auth.UserCredential> => {
+    return new Promise((resolve, reject) => {
+      firebase
+        .auth()
+        .createUserWithEmailAndPassword(email, password)
+        .then((res) => {
+          firebase.auth().currentUser?.sendEmailVerification();
+          resolve(res);
+        })
+        .catch(() => reject());
+    });
+  };
+
   const connectWithGoogle = () => {
     firebase.auth().signInWithRedirect(FirebaseApp.google_provider);
+  };
+
+  const connectWithEmailAndPassword = (
+    email: string,
+    password: string
+  ): Promise<firebase.auth.UserCredential> => {
+    return new Promise((resolve, reject) => {
+      firebase
+        .auth()
+        .signInWithEmailAndPassword(email, password)
+        .then((res) => {
+          if (!res.user?.emailVerified) {
+            firebase.auth().currentUser?.sendEmailVerification();
+            reject(
+              new Error(
+                "Veuillez à confirmer votre adresse email avant de vous connecter"
+              )
+            );
+          }
+          resolve();
+        })
+        .catch((error) => {
+          // if (
+          //   error.code === "auth/wrong-password" ||
+          //   error.code === "auth/user-not-found" ||
+          //   error.code === "auth/too-many-requests"
+          // ) {
+          reject(
+            new Error(
+              "Le mot de passe n'est pas valide ou l'adresse email n'est lié à aucun utilisateur"
+            )
+          );
+          // }
+        });
+    });
   };
 
   const signOut = () => {
@@ -241,7 +328,7 @@ export const FirebaseProvider = ({
 
   useEffect(() => {
     initCurrentUser();
-  }, []);
+  });
 
   return (
     <CtxProvider
@@ -252,7 +339,9 @@ export const FirebaseProvider = ({
         user: FirebaseApp.user,
         setAuthenticated,
         initCurrentUser,
+        createUserWithEmailAndPassword,
         connectWithGoogle,
+        connectWithEmailAndPassword,
         signOut,
         listenStatements,
         listenStatement,

@@ -1,21 +1,13 @@
 import React from "react";
 import { useFirebase } from "./context/firebase.context";
-import { FButton } from "./styled/button.styled";
 import { Redirect } from "react-router-dom";
+import { LoadingComponent } from "./component";
 
 const App = () => {
-  const { authenticated, loadingUser, connectWithGoogle } = useFirebase();
+  const { authenticated, loadingUser } = useFirebase();
 
-  if (loadingUser) return <div>Loading ....</div>;
-  if (authenticated) return <Redirect to="/dashboard" />;
-  return (
-    <div className="App">
-      <div>
-        <FButton onClick={() => connectWithGoogle()}>
-          Connexion avec Google
-        </FButton>
-      </div>
-    </div>
-  );
+  if (loadingUser) return <LoadingComponent />;
+  if (authenticated) return <Redirect to="/statements" />;
+  return <Redirect to="/Connection" />;
 };
 export default App;

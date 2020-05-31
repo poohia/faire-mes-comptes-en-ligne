@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from "react";
-import moment from "moment";
-import { Container, Grid, Button, Header, Icon } from "semantic-ui-react";
-import { Redirect, Link } from "react-router-dom";
+import { Container, Grid, Header, Icon } from "semantic-ui-react";
+import { Redirect } from "react-router-dom";
 import { Subscription } from "rxjs";
 
 import { useFirebase } from "../../context/firebase.context";
@@ -12,6 +11,7 @@ import {
   ModalCreateStatement,
   FooterDashboard,
 } from "./components";
+import { LoadingComponent } from "../../component";
 
 const DashboardPage = () => {
   const [statements, setStatements] = useState<Statement[] | null>(null);
@@ -42,9 +42,17 @@ const DashboardPage = () => {
         })
       );
     }
-  }, [openModal, statements, statementOfMonthCreated, authenticated]);
+  }, [
+    openModal,
+    statements,
+    statementOfMonthCreated,
+    authenticated,
+    loadingStatements,
+    subscriptionStatements,
+    listenStatements,
+  ]);
 
-  if (loadingUser || loadingStatements) return <div>Loading ....</div>;
+  if (loadingUser || loadingStatements) return <LoadingComponent />;
   if (!authenticated) return <Redirect to="/" />;
   if (statements === null) {
     return <NewUserComponent></NewUserComponent>;

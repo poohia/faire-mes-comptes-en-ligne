@@ -60,104 +60,22 @@ export const AlgoTypePayment = (key: string, defaultvalue: string): string => {
     return defaultvalue;
   }
 
+  let defValue = defaultvalue;
   const valSplit = key.split(" ");
   for (let i = 0; i < valSplit.length; i++) {
     const val = valSplit[i];
-    const wordWithTwoDefinitionFind = wordWithTwoDefinition.find(
-      (def) => def.key === val
-    );
-    if (wordWithTwoDefinitionFind !== undefined) {
-      if (valSplit.length === 1) {
-        return wordWithTwoDefinitionFind.defaultValue;
-      } else {
-        const strfind = valSplit[i + 1]
-          .toLowerCase()
-          .normalize("NFD")
-          .replace(/[\u0300-\u036f]/g, "");
-        for (let option of PaymentOptions) {
-          if (option.value === "other") continue;
-          if (option.keywords.includes(strfind)) return option.value as string;
-        }
-      }
-    }
+
     const strfind = val
       .toLowerCase()
       .normalize("NFD")
       .replace(/[\u0300-\u036f]/g, "");
     for (let option of PaymentOptions) {
       if (option.value === "other") continue;
-      if (option.keywords.includes(strfind)) return option.value as string;
+      if (option.keywords.includes(strfind)) defValue = option.value as string;
     }
   }
-  return "other";
+  return defValue;
 };
-
-const wordWithTwoDefinition: { key: string; defaultValue: string }[] = [
-  {
-    key: "e leclerc",
-    defaultValue: "foodrace",
-  },
-  {
-    key: "e.leclerc",
-    defaultValue: "foodrace",
-  },
-  {
-    key: "leclerc",
-    defaultValue: "foodrace",
-  },
-  {
-    key: "carrefour",
-    defaultValue: "foodrace",
-  },
-  {
-    key: "auchan",
-    defaultValue: "foodrace",
-  },
-  {
-    key: "orange",
-    defaultValue: "internet",
-  },
-  {
-    key: "sfr",
-    defaultValue: "internet",
-  },
-  {
-    key: "bouygues",
-    defaultValue: "internet",
-  },
-  {
-    key: "amazon",
-    defaultValue: "onlineshopping",
-  },
-  {
-    key: "cdiscount",
-    defaultValue: "onlineshopping",
-  },
-  {
-    key: "ebay",
-    defaultValue: "onlineshopping",
-  },
-  {
-    key: "veepee",
-    defaultValue: "onlineshopping",
-  },
-  {
-    key: "vente privee",
-    defaultValue: "onlineshopping",
-  },
-  {
-    key: "showroom",
-    defaultValue: "onlineshopping",
-  },
-  {
-    key: "google",
-    defaultValue: "onlineshopping",
-  },
-  {
-    key: "uber",
-    defaultValue: "car",
-  },
-];
 
 type PaymentOptionsProps = {
   keywords: string[];
@@ -269,6 +187,11 @@ export const PaymentOptions: PaymentOptionsProps[] = [
       "casino",
       "aldi",
       "sherpa",
+      "e leclerc",
+      "e.leclerc",
+      "leclerc",
+      "carrefour",
+      "auchan",
     ],
   },
   {
@@ -283,7 +206,7 @@ export const PaymentOptions: PaymentOptionsProps[] = [
     icon: "at",
     text: "Internet",
     value: "internet",
-    keywords: ["internet", "web", "box"],
+    keywords: ["internet", "web", "box", "orange", "sfr", "bouygues"],
   },
   {
     key: "movie",
@@ -373,6 +296,8 @@ export const PaymentOptions: PaymentOptionsProps[] = [
       "veterinaire",
       "chien",
       "chat",
+      "chiens",
+      "chats",
       "furet",
       "rat",
       "cochon",
@@ -404,6 +329,7 @@ export const PaymentOptions: PaymentOptionsProps[] = [
     keywords: [
       "restaurant",
       "eat",
+      "eats",
       "justeat",
       "deliveroo",
       "brasserie",
@@ -420,7 +346,23 @@ export const PaymentOptions: PaymentOptionsProps[] = [
     icon: "gamepad",
     text: "Divertissement",
     value: "viedogame",
-    keywords: ["ps4", "playstation", "xbox", "jeux", "jeu", "console", "livre"],
+    keywords: [
+      "ps4",
+      "playstation",
+      "xbox",
+      "jeux",
+      "jeu",
+      "console",
+      "livre",
+      "gaming",
+      "play",
+      "book",
+      "audible",
+      "livres",
+      "lecteurs",
+      "kobo",
+      "kindle",
+    ],
   },
   {
     key: "donation",
@@ -480,6 +422,7 @@ export const PaymentOptions: PaymentOptionsProps[] = [
       "voyage",
       "train",
       "avion",
+      "vole",
       "afghanistan",
       "afrique du sud",
       "albanie",
@@ -744,7 +687,18 @@ export const PaymentOptions: PaymentOptionsProps[] = [
     icon: "amazon",
     text: "Achat sur internet",
     value: "onlineshopping",
-    keywords: ["Achat sur internet", "delabs"],
+    keywords: [
+      "Achat sur internet",
+      "delabs",
+      "amazon",
+      "cdiscount",
+      "ebay",
+      "veepee",
+      "vente privee",
+      "showroom",
+      "google",
+      "rakuten",
+    ],
   },
   {
     key: "shopping",
@@ -984,7 +938,7 @@ export const PaymentOptions: PaymentOptionsProps[] = [
     icon: "id card",
     value: "withdrawal",
     text: "Retrait d'argent",
-    keywords: ["liquide", "monnaie", "retrait", "argent", "euros"],
+    keywords: ["liquide", "monnaie", "retrait", "argent", "euros", "espece"],
   },
   {
     key: "other",

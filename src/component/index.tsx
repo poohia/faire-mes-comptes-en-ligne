@@ -2,8 +2,9 @@ import styled from "styled-components";
 
 import { MenuConnected } from "./menu.component";
 import { TemplateConnected } from "./templates.compent";
+import { LoadingComponent } from "./loading.component";
 
-export { MenuConnected, TemplateConnected };
+export { MenuConnected, TemplateConnected, LoadingComponent };
 
 export const FooterContent = styled.div`
   height: 65px;
@@ -73,6 +74,17 @@ export const ListContent = styled.div`
       width: 100px;
       border-radius: 3px;
       text-align: center;
+    }
+    @media screen and (max-width: 680px) {
+      text-align: center;
+      button.ui.button {
+        position: relative;
+        top: 0;
+        left: 0;
+        width: 100%;
+        margin-top: 3px;
+        margin-bottom: 2px;
+      }
     }
   }
 `;

@@ -52,11 +52,20 @@ code {
 }
 
 input[type="text"]:focus,
-input[type="number"]:focus {
+input[type="number"]:focus,
+input[type="password"]:focus {
   border-color: #11c1ab !important;
 }
 
 .ui.selection.dropdown:focus,
 .ui.selection.dropdown:focus .menu {
   border-color: #11c1ab !important;
+}
+
+.Toastify__toast--error {
+  background-color: #ff5e57;
+}
+
+.ui.menu .item {
+  color: #34495e !important;
 }

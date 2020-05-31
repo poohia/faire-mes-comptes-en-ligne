@@ -17,24 +17,9 @@ import {
 
 export const ChartMonth = ({ statement }: { statement: Statement }) => {
   if (statement.payments === undefined) {
-    return <div>error</div>;
+    return <div>Error</div>;
   }
-  console.log(
-    Object.values(statement.payments)
-      .filter((v) => {
-        const payment: Payment = v as Payment;
-        return payment.active;
-      })
-      .map((v) => {
-        const payment: Payment = v as Payment;
-        if (payment.active)
-          return {
-            name: getLabelOfType(payment.type),
-            montant: payment.debit ? payment.amount * -1 : payment.amount,
-          };
-        return {};
-      })
-  );
+
   if (statement.payments === undefined) return <div />;
 
   const cleanData = (): { name: string; montant: number }[] => {

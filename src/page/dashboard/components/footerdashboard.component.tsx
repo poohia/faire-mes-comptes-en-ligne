@@ -51,7 +51,7 @@ export const FooterDashboard = ({
             {statements !== undefined &&
               statements !== null &&
               statementOfMonthCreated && (
-                <Link to={`dashboard/statement/${moment().format("MMYYYY")}`}>
+                <Link to={`statements/statement/${moment().format("MMYYYY")}`}>
                   <Button primary icon labelPosition="right">
                     Editer mon relever de compte du moi
                     <Icon name="arrow right" />

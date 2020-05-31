@@ -6,11 +6,20 @@ export const TemplateConnected = ({
   children,
 }: {
   children: React.ReactNode;
-}) => (
-  <Container fluid>
-    <MenuConnected />
-    <Container style={{ padding: "10px" }} fluid>
-      {children}
+}) => {
+  const { pathname } = window.location;
+  return (
+    <Container fluid>
+      <MenuConnected />
+      <Container
+        style={{
+          padding: "10px",
+          marginBottom: pathname.includes("statistics") ? "0px" : "80px",
+        }}
+        fluid
+      >
+        {children}
+      </Container>
     </Container>
-  </Container>
-);
+  );
+};

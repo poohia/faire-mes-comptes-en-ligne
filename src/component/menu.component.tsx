@@ -4,18 +4,18 @@ import { useFirebase } from "../context/firebase.context";
 import { Link } from "react-router-dom";
 
 export const MenuConnected = () => {
-  const { signOut } = useFirebase();
+  const { signOut, user } = useFirebase();
   const { pathname } = window.location;
   return (
     <Menu stackable size="massive" color="blue" style={{ borderRadius: "0px" }}>
-      <Link to="/dashboard">
+      <Link to="/statements">
         <Menu.Item style={{ padding: "8px" }}>
-          <img src="/logotmp.png" />
+          <img src={"/logotmp.png"} alt="Logo du site" />
         </Menu.Item>
       </Link>
 
-      <Link to="/dashboard">
-        <Menu.Item active={pathname.includes("/dashboard")}>
+      <Link to="/statements">
+        <Menu.Item active={pathname.includes("/statements")}>
           <Icon name="file alternate outline" /> Mes relévés
         </Menu.Item>
       </Link>
@@ -25,6 +25,8 @@ export const MenuConnected = () => {
         </Menu.Item>
       </Link>
       <Menu.Menu position="right">
+        {user?.email && <Menu.Item as="span">{user.email}</Menu.Item>}
+
         <Menu.Item onClick={() => signOut()}>
           <Icon name="sign-out" /> Déconnexion
         </Menu.Item>

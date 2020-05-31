@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from "react";
-import moment from "moment";
 import { Container, Grid, Dropdown, Header } from "semantic-ui-react";
-import { Redirect } from "react-router-dom";
+import { Redirect, Link } from "react-router-dom";
 import { Subscription } from "rxjs";
 import styled from "styled-components";
+import moment from "moment";
 
 import { useFirebase } from "../../context/firebase.context";
 import {
@@ -12,6 +12,7 @@ import {
   getLabelOfType,
 } from "../../model/statement.model";
 import { ChartMonth, ChartMonthType, ChartCompareMonths } from "./components";
+import { LoadingComponent } from "../../component";
 
 const ChartContent = styled.div`
   width: 100%;
@@ -28,9 +29,7 @@ const ChartContent = styled.div`
 
 const StatisticsPage = () => {
   const [statements, setStatements] = useState<Statement[] | null>(null);
-  const [statementSelected, setStatementSelected] = useState<string>(
-    moment().format("MMYYYY")
-  );
+  const [statementSelected] = useState<string>(moment().format("MMYYYY"));
   const [typeSelected, setTypeSelected] = useState<string>("other");
   const [
     subscriptionStatements,
@@ -53,12 +52,34 @@ const StatisticsPage = () => {
         })
       );
     }
-  }, [statementSelected, statements, authenticated]);
+  }, [
+    statementSelected,
+    statements,
+    authenticated,
+    loadingStatements,
+    subscriptionStatements,
+    listenStatements,
+  ]);
 
-  if (loadingUser || loadingStatements) return <div>Loading ....</div>;
+  if (loadingUser || loadingStatements) return <LoadingComponent />;
   if (!authenticated) return <Redirect to="/" />;
   if (statements === null) {
-    return <div>empty</div>;
+    return (
+      <Container>
+        <Grid>
+          <Grid.Row>
+            <Header as="h1">
+              Bonjour,
+              <Header.Subheader>
+                Vous n'avez encore fait aucun relevé de compte, allez sur
+                l'onglet <Link to="/statements">"Mes relévé"</Link> pour créer
+                votre premier relevé.
+              </Header.Subheader>
+            </Header>
+          </Grid.Row>
+        </Grid>
+      </Container>
+    );
   }
 
   const statementSelectedObject = statements.find(
@@ -73,6 +94,30 @@ const StatisticsPage = () => {
     (statement) =>
       statement.id === moment().subtract(1, "months").format("MMYYYY")
   );
+
+  if (statementSelectedObject?.payments === undefined) {
+    return (
+      <Container>
+        <Grid>
+          <Grid.Row>
+            <Header>
+              Bonjour,{" "}
+              <Header.Subheader>
+                Il n'y a aucun paiement pour le relevé{" "}
+                {statementSelectedObject?.label}. Cliquez sur ce{" "}
+                <Link
+                  to={`statements/statement/${statementSelectedObject?.id}`}
+                >
+                  lien
+                </Link>{" "}
+                afin d'ajouter des paiements à se relevé.
+              </Header.Subheader>
+            </Header>
+          </Grid.Row>
+        </Grid>
+      </Container>
+    );
+  }
 
   return (
     <Container fluid>
@@ -93,16 +138,19 @@ const StatisticsPage = () => {
                   setStatementSelected(data.value as string)
                 }
               /> */}
-              <Header as="h1">{lastStatement?.label}</Header>
+              <Header as="h1">{statementSelectedObject?.label}</Header>
               {statementSelectedObject && (
                 <ChartMonth statement={statementSelectedObject} />
               )}
             </ChartContent>
           </Grid.Column>
         </Grid.Row>
-        {currStatement && lastStatement && (
+        {currStatement && statementSelectedObject && (
           <Grid.Row>
-            <Grid.Column computer={"8"} tablet={"16"}>
+            <Grid.Column
+              computer={lastStatement === undefined ? "16" : "8"}
+              tablet={"16"}
+            >
               <ChartContent>
                 {/* <Dropdown
                   className="button icon"
@@ -118,7 +166,7 @@ const StatisticsPage = () => {
                   search
                 /> */}
                 <Header as="h1">
-                  {lastStatement?.label} par catégorie{" "}
+                  {statementSelectedObject?.label} par catégorie{" "}
                   {getLabelOfType(typeSelected)}
                 </Header>
                 <Dropdown
@@ -142,18 +190,23 @@ const StatisticsPage = () => {
                 )}
               </ChartContent>
             </Grid.Column>
-            <Grid.Column computer={"8"} tablet={"16"}>
-              <ChartContent>
-                <Header as="h1">
-                  Comparaison du relevé {currStatement.label} avec le relevé{" "}
-                </Header>
-                {lastStatement.label}
-                <ChartCompareMonths
-                  currStatement={currStatement}
-                  lastStatement={lastStatement}
-                />
-              </ChartContent>
-            </Grid.Column>
+            {lastStatement && (
+              <Grid.Column computer={"8"} tablet={"16"}>
+                <ChartContent>
+                  <Header as="h1">
+                    Comparaison du relevé du moi de{" "}
+                    {moment(currStatement.createDate).format("MMM")} avec le
+                    relevé du moi de{" "}
+                    {moment(lastStatement.createDate).format("MMM")}
+                  </Header>
+                  {statementSelectedObject.label}
+                  <ChartCompareMonths
+                    currStatement={statementSelectedObject}
+                    lastStatement={lastStatement}
+                  />
+                </ChartContent>
+              </Grid.Column>
+            )}
           </Grid.Row>
         )}
       </Grid>

@@ -4,16 +4,22 @@ import { BrowserRouter as Router, Switch, Route } from "react-router-dom";
 import moment from "moment";
 import "semantic-ui-css/semantic.min.css";
 
+import "moment/locale/fr";
+
 import "./index.css";
+import "react-toastify/dist/ReactToastify.css";
 import App from "./App";
 import * as serviceWorker from "./serviceWorker";
 import FirebaseProvider from "./context/firebase.context";
 import DashboardPage from "./page/dashboard";
 import StatementPage from "./page/statement";
-import { TemplateConnected } from "./component";
-
-import "moment/locale/fr";
 import StatisticsPage from "./page/statistics";
+import ConnectionComponent from "./page/connection";
+import InscriptionComponent from "./page/inscription";
+
+import { TemplateConnected } from "./component";
+import { ToastContainer } from "react-toastify";
+
 moment.locale("fr");
 
 ReactDOM.render(
@@ -24,12 +30,18 @@ ReactDOM.render(
           <Route path="/" exact>
             <App />
           </Route>
-          <Route path="/dashboard" exact>
+          <Route path="/connection" exact>
+            <ConnectionComponent />
+          </Route>
+          <Route path="/inscription" exact>
+            <InscriptionComponent />
+          </Route>
+          <Route path="/statements" exact>
             <TemplateConnected>
               <DashboardPage />
             </TemplateConnected>
           </Route>
-          <Route path="/dashboard/statement/:id" exact>
+          <Route path="/statements/statement/:id" exact>
             <TemplateConnected>
               <StatementPage />
             </TemplateConnected>
@@ -41,6 +53,17 @@ ReactDOM.render(
           </Route>
         </Switch>
       </Router>
+      <ToastContainer
+        position="top-right"
+        autoClose={15000}
+        hideProgressBar={false}
+        newestOnTop={false}
+        closeOnClick
+        rtl={false}
+        pauseOnFocusLoss
+        draggable
+        pauseOnHover
+      />
     </React.StrictMode>
   </FirebaseProvider>,
   document.getElementById("root")

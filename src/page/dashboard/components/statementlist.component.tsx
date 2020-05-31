@@ -1,7 +1,6 @@
 import React, { useState } from "react";
-import { Table, Button, Icon, Popup, Modal, Header } from "semantic-ui-react";
+import { Button, Icon, Modal, Header } from "semantic-ui-react";
 import moment from "moment";
-import styled from "styled-components";
 
 import { Statement } from "../../../model/statement.model";
 import { useHistory } from "react-router";
@@ -21,7 +20,8 @@ export const StatementList = ({ statements }: { statements: Statement[] }) => {
         {statements.map((statement) => (
           <div
             className="hizmet-buton"
-            onClick={() => push(`dashboard/statement/${statement.id}`)}
+            onClick={() => push(`statements/statement/${statement.id}`)}
+            key={statement.id}
           >
             <span className="hizmet-title">{statement.label}</span>
             <span className="hizmet-small">
